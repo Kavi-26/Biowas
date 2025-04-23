@@ -12,6 +12,14 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+
+    
+      "expo": {
+        "permissions": ["CAMERA"]
+      },
+    
+    
+
     "ios": {
       "supportsTablet": true
     },
@@ -25,4 +33,5 @@
       "favicon": "./assets/favicon.png"
     }
   }
+  
 }
