@@ -6,7 +6,8 @@ import {
   TouchableOpacity, 
   StyleSheet, 
   SafeAreaView, 
-  Alert 
+  Alert, 
+  ActivityIndicator 
 } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
@@ -14,6 +15,7 @@ import { auth } from '../firebaseConfig';
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false); // 👈 Add loading state
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -21,56 +23,71 @@ const LoginScreen = ({ navigation }) => {
       return;
     }
 
+    setLoading(true); // 👈 Start loading
+
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigation.replace('Home');
+
+      // Check if user is admin
+      if (email.toLowerCase() === 'admin@gmail.com') {
+        navigation.replace('AdminScreen');
+      } else {
+        navigation.replace('Home');
+      }
     } catch (error) {
       Alert.alert('Login Error', error.message);
+    } finally {
+      setLoading(false); // 👈 Stop loading no matter what
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.formContainer}>
-        <Text style={styles.title}>Welcome Back</Text>
-        
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          placeholderTextColor="#888"
-        />
-        
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          placeholderTextColor="#888"
-        />
-        
-        <TouchableOpacity style={styles.forgotPassword}>
-          <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.loginButton} 
-          onPress={handleLogin}
-        >
-          <Text style={styles.loginButtonText}>Login</Text>
-        </TouchableOpacity>
-        
-        <View style={styles.registerContainer}>
-          <Text style={styles.registerText}>Don't have an account? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-            <Text style={styles.registerLink}>Register</Text>
+      {loading ? (
+        // 👇 Show spinner when loading
+        <ActivityIndicator size="large" color="#007bff" style={{ flex: 1, justifyContent: 'center' }} />
+      ) : (
+        <View style={styles.formContainer}>
+          <Text style={styles.title}>Welcome Back</Text>
+
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            placeholderTextColor="#888"
+          />
+
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            placeholderTextColor="#888"
+          />
+
+          <TouchableOpacity style={styles.forgotPassword}>
+            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.loginButton} 
+            onPress={handleLogin}
+          >
+            <Text style={styles.loginButtonText}>Login</Text>
+          </TouchableOpacity>
+
+          <View style={styles.registerContainer}>
+            <Text style={styles.registerText}>Don't have an account? </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+              <Text style={styles.registerLink}>Register</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      )}
     </SafeAreaView>
   );
 };

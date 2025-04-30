@@ -1,182 +1,104 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
-import { collection, addDoc } from 'firebase/firestore';
-import { db } from '../firebaseConfig';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
+import { Camera } from 'expo-camera';
+import { auth, db } from '../firebaseConfig';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 
-const AdminScreen = () => {
-  const [name, setName] = useState('');
-  const [price, setPrice] = useState('');
-  const [image, setImage] = useState('');
-  const [about, setAbout] = useState('');
-  const [recycledMaterial, setRecycledMaterial] = useState('');
+const AdminScreen = ({ navigation }) => {
+  const [hasPermission, setHasPermission] = useState(null);
+  const [scanned, setScanned] = useState(false);
+  const cameraRef = useRef(null);
 
-  const handleAddProduct = async () => {
-    if (!name || !price || !image || !about || !recycledMaterial) {
-      Alert.alert("Error", "Please fill in all fields");
-      return;
-    }
+  useEffect(() => {
+    (async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      setHasPermission(status === 'granted');
+    })();
+  }, []);
 
+  const handleBarCodeScanned = async ({ data }) => {
+    setScanned(true);
     try {
-      await addDoc(collection(db, 'products'), {
-        name: name,
-        price: parseFloat(price),
-        image: image,
-        about: about,
-        recycledMaterial: recycledMaterial,
-        createdAt: new Date(),
-      });
+      const decoded = JSON.parse(data);
 
-      Alert.alert("Success", "Product added successfully!");
-      setName('');
-      setPrice('');
-      setImage('');
-      setAbout('');
-      setRecycledMaterial('');
-    } catch (error) {
-      console.error("Error adding product: ", error);
-      Alert.alert("Error", "Failed to add product");
+      const q = query(collection(db, 'users'), where('uid', '==', decoded.uid));
+      const snapshot = await getDocs(q);
+
+      if (!snapshot.empty) {
+        const userDoc = snapshot.docs[0].data();
+
+        if (userDoc.isAdmin === true) {
+          navigation.navigate('PointsScreen');
+        } else {
+          Alert.alert('Access Denied', 'User is not an admin.');
+        }
+      } else {
+        Alert.alert('User Not Found', 'No matching user for this QR.');
+      }
+    } catch (err) {
+      Alert.alert('Scan Error', 'Invalid QR Code or corrupted data.');
     }
   };
 
+  if (hasPermission === null) {
+    return <View style={styles.center}><Text>Requesting camera permission...</Text></View>;
+  }
+
+  if (hasPermission === false) {
+    return <View style={styles.center}><Text>No access to camera.</Text></View>;
+  }
+
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <View style={styles.container}>
-        <Text style={styles.header}>Add New Product</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Product Name"
-          value={name}
-          onChangeText={setName}
-        />
-        
-        <TextInput
-          style={styles.input}
-          placeholder="Price (e.g. 9.99)"
-          keyboardType="numeric"
-          value={price}
-          onChangeText={setPrice}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Image URL"
-          value={image}
-          onChangeText={setImage}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="About Product"
-          multiline
-          value={about}
-          onChangeText={setAbout}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Recycled Material Used"
-          value={recycledMaterial}
-          onChangeText={setRecycledMaterial}
-        />
-
-        <TouchableOpacity style={styles.button} onPress={handleAddProduct}>
-          <Text style={styles.buttonText}>Add Product</Text>
+    <View style={styles.container}>
+      <Camera
+        style={StyleSheet.absoluteFillObject}
+        ref={cameraRef}
+        type="back" // ✅ Correct usage without Camera.Constants.Type or CameraType
+        onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+        barCodeScannerSettings={{
+          barCodeTypes: ['qr'],
+        }}
+      />
+      {scanned && (
+        <TouchableOpacity
+          style={styles.scanButton}
+          onPress={() => setScanned(false)}
+        >
+          <Text style={styles.scanText}>Scan Again</Text>
         </TouchableOpacity>
-      </View>
-    </ScrollView>
+      )}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollContainer: {
-    flexGrow: 1,
-    backgroundColor: '#F1F8E9',
-    paddingVertical: 20,
-  },
   container: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 20,
-    marginHorizontal: 15,
-    elevation: 5,
+    flex: 1,
   },
-  header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#2E7D32',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  input: {
-    backgroundColor: '#F9F9F9',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    fontSize: 16,
-  },
-  button: {
-    backgroundColor: '#2E7D32',
-    paddingVertical: 12,
-    borderRadius: 8,
+  center: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 10,
   },
-  buttonText: {
-    color: '#ffffff',
-    fontSize: 18,
+  scanButton: {
+    position: 'absolute',
+    bottom: 40,
+    alignSelf: 'center',
+    backgroundColor: '#34d399',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  scanText: {
+    color: '#fff',
     fontWeight: 'bold',
   },
 });
 
 export default AdminScreen;
-
-
-
-
-
-
-
-
-
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
-import { CameraKitCameraScreen } from 'react-native-camera-kit';
-
-const ProfileScreen = ({ navigation }) => {
-  const [scanned, setScanned] = useState(false);
-
-  const onQRScan = (event) => {
-    if (scanned) return;
-    setScanned(true);
-
-    try {
-      const data = JSON.parse(event.nativeEvent.codeStringValue);
-      if (data.uid) {
-        navigation.navigate('UserDetail', { uid: data.uid });
-      } else {
-        Alert.alert("Invalid QR Code", "No UID found in QR code.");
-        setScanned(false);
-      }
-    } catch (error) {
-      Alert.alert("Error", "Failed to parse QR code.");
-      setScanned(false);
-    }
-  };
-
-  return (
-    <View style={{ flex: 1 }}>
-      <CameraKitCameraScreen
-        showFrame={true}
-        scanBarcode={true}
-        laserColor={'blue'}
-        frameColor={'yellow'}
-        onReadCode={onQRScan}
-      />
-    </View>
-  );
-};
-
-export default ProfileScreen;

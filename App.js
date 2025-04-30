@@ -12,32 +12,32 @@ import ProfileScreen from './Screens/ProfileScreen';
 import ProductsScreen from './Screens/ProductsScreen';
 import OrderPlacedScreen from './Screens/OrderPlacesScreen';
 import MapScreen from './Screens/MapScreen';
+import AdminScreen from './Screens/AdminScreen'; // ✅ Added AdminScreen
 
-// Create Stack Navigator for Authentication Screens
+// Create Stack Navigator
 const Stack = createStackNavigator();
 
-// Create Bottom Tab Navigator for Main Screens
+// Create Bottom Tab Navigator
 const Tab = createBottomTabNavigator();
 
-// 🚀 Bottom Tabs (Home, Profile, Products, Map)
+// 🚀 Bottom Tabs (Home, Products, Map, Profile)
 const MainTabs = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ color, size }) => {
           let iconName;
+
           if (route.name === 'Home') {
             iconName = 'home-outline';
-          } 
-          else if (route.name === 'Products') {
+          } else if (route.name === 'Products') {
             iconName = 'cart-outline';
-          } 
-          else if (route.name === 'Map') {
+          } else if (route.name === 'Map') {
             iconName = 'map-outline';
-          }
-          else if (route.name === 'Profile') {
+          } else if (route.name === 'Profile') {
             iconName = 'person-outline';
-          } 
+          }
+
           return <Ionicons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: '#007bff',
@@ -52,7 +52,7 @@ const MainTabs = () => {
   );
 };
 
-// 🚀 Main App Navigation (Authentication + Tabs)
+// 🚀 Main App Navigation
 const App = () => {
   return (
     <NavigationContainer>
@@ -60,19 +60,17 @@ const App = () => {
         initialRouteName="Login"
         screenOptions={{ headerShown: false }}
       >
+        {/* Authentication Screens */}
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
+
+        {/* Main Screens */}
         <Stack.Screen name="Home" component={MainTabs} />
-        <Stack.Screen
-                name="Products"
-                component={ProductsScreen} 
-                options={{ headerShown: true }}
-                />
-                <Stack.Screen
-                name="OrderPlaced"
-                component={OrderPlacedScreen} 
-                options={{ headerShown: true }}
-                />
+        <Stack.Screen name="OrderPlaced" component={OrderPlacedScreen} options={{ headerShown: true }} />
+        <Stack.Screen name="Products" component={ProductsScreen} options={{ headerShown: true }} />
+
+        {/* Admin Screen */}
+        <Stack.Screen name="AdminScreen" component={AdminScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
