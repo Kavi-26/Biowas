@@ -7,15 +7,20 @@ import {
   StyleSheet, 
   SafeAreaView, 
   Alert, 
-  ActivityIndicator 
+  ActivityIndicator,
+  Dimensions 
 } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
+import * as Animatable from 'react-native-animatable';
+import { LinearGradient } from 'expo-linear-gradient';
+
+const { width } = Dimensions.get('window');
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false); // 👈 Add loading state
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -23,12 +28,11 @@ const LoginScreen = ({ navigation }) => {
       return;
     }
 
-    setLoading(true); // 👈 Start loading
+    setLoading(true);
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
 
-      // Check if user is admin
       if (email.toLowerCase() === 'admin@gmail.com') {
         navigation.replace('AdminScreen');
       } else {
@@ -37,124 +41,186 @@ const LoginScreen = ({ navigation }) => {
     } catch (error) {
       Alert.alert('Login Error', error.message);
     } finally {
-      setLoading(false); // 👈 Stop loading no matter what
+      setLoading(false);
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {loading ? (
-        // 👇 Show spinner when loading
-        <ActivityIndicator size="large" color="#007bff" style={{ flex: 1, justifyContent: 'center' }} />
-      ) : (
-        <View style={styles.formContainer}>
-          <Text style={styles.title}>Welcome Back</Text>
+    <LinearGradient
+      colors={['#f4f4f4', '#e0e0e0']}
+      style={styles.container}>
+      <SafeAreaView style={styles.container}>
+        {loading ? (
+          <Animatable.View 
+            animation="pulse" 
+            easing="ease-out" 
+            iterationCount="infinite"
+            style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#007bff" />
+          </Animatable.View>
+        ) : (
+          <Animatable.View 
+            animation="fadeInUp" 
+            duration={1000} 
+            style={styles.content}>
+            <Animatable.Image
+              animation="bounceIn"
+              duration={1500}
+              source={require('../assets/logo.png')}
+              style={styles.logo}
+            />
 
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            placeholderTextColor="#888"
-          />
+            <Animatable.View 
+              animation="fadeInUp"
+              delay={500}
+              style={styles.formContainer}>
+              <Text style={styles.title}>Welcome Back</Text>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            placeholderTextColor="#888"
-          />
+              <Animatable.View animation="fadeInLeft" delay={600}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Email"
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  placeholderTextColor="#888"
+                />
+              </Animatable.View>
 
-          <TouchableOpacity style={styles.forgotPassword}>
-            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-          </TouchableOpacity>
+              <Animatable.View animation="fadeInRight" delay={800}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Password"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry
+                  placeholderTextColor="#888"
+                />
+              </Animatable.View>
 
-          <TouchableOpacity 
-            style={styles.loginButton} 
-            onPress={handleLogin}
-          >
-            <Text style={styles.loginButtonText}>Login</Text>
-          </TouchableOpacity>
+              <Animatable.View animation="fadeIn" delay={1000}>
+                <TouchableOpacity 
+                  style={styles.forgotPassword}
+                  activeOpacity={0.7}>
+                  <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+                </TouchableOpacity>
 
-          <View style={styles.registerContainer}>
-            <Text style={styles.registerText}>Don't have an account? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-              <Text style={styles.registerLink}>Register</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
-    </SafeAreaView>
+                <TouchableOpacity 
+                  style={styles.loginButton} 
+                  onPress={handleLogin}
+                  activeOpacity={0.8}>
+                  <Text style={styles.loginButtonText}>Login</Text>
+                </TouchableOpacity>
+
+                <View style={styles.registerContainer}>
+                  <Text style={styles.registerText}>Don't have an account? </Text>
+                  <TouchableOpacity 
+                    onPress={() => navigation.navigate('Register')}
+                    activeOpacity={0.7}>
+                    <Text style={styles.registerLink}>Register</Text>
+                  </TouchableOpacity>
+                </View>
+              </Animatable.View>
+            </Animatable.View>
+          </Animatable.View>
+        )}
+      </SafeAreaView>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f4f4f4',
+  },
+  content: {
+    flex: 1,
     justifyContent: 'center',
+    padding: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logo: {
+    width: 120,
+    height: 120,
+    alignSelf: 'center',
+    marginBottom: 30,
   },
   formContainer: {
     backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 20,
-    marginHorizontal: 20,
+    borderRadius: 25,
+    padding: 25,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 15,
+    elevation: 8,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 20,
-    color: '#333',
+    marginBottom: 30,
+    color: '#1a1a1a',
   },
   input: {
     backgroundColor: '#f9f9f9',
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 15,
+    borderRadius: 15,
+    padding: 15,
+    marginBottom: 20,
     borderWidth: 1,
     borderColor: '#e0e0e0',
     fontSize: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   forgotPassword: {
     alignSelf: 'flex-end',
-    marginBottom: 15,
+    marginBottom: 20,
   },
   forgotPasswordText: {
     color: '#007bff',
-    fontSize: 14,
+    fontSize: 15,
+    fontWeight: '600',
   },
   loginButton: {
     backgroundColor: '#007bff',
-    borderRadius: 10,
-    paddingVertical: 12,
+    borderRadius: 15,
+    paddingVertical: 15,
     alignItems: 'center',
+    shadowColor: '#007bff',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
   },
   loginButtonText: {
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
+    letterSpacing: 0.5,
   },
   registerContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 15,
+    marginTop: 20,
+    paddingVertical: 10,
   },
   registerText: {
     color: '#666',
+    fontSize: 16,
   },
   registerLink: {
     color: '#007bff',
     fontWeight: 'bold',
+    fontSize: 16,
   }
 });
 

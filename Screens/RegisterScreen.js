@@ -16,9 +16,11 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { collection, addDoc } from 'firebase/firestore';
 import { auth, db } from '../firebaseConfig';
 import * as ImagePicker from 'expo-image-picker';
+import * as Animatable from 'react-native-animatable';
+import { LinearGradient } from 'expo-linear-gradient';
 
-const InputField = ({ placeholder, value, onChangeText, secureTextEntry, keyboardType }) => (
-  <View style={styles.inputContainer}>
+const InputField = ({ placeholder, value, onChangeText, secureTextEntry, keyboardType, animation, delay }) => (
+  <Animatable.View animation={animation} delay={delay}>
     <TextInput
       style={styles.input}
       placeholder={placeholder}
@@ -26,10 +28,10 @@ const InputField = ({ placeholder, value, onChangeText, secureTextEntry, keyboar
       onChangeText={onChangeText}
       secureTextEntry={secureTextEntry}
       keyboardType={keyboardType}
-      placeholderTextColor="#666"
+      placeholderTextColor="#888"
       autoCapitalize="none"
     />
-  </View>
+  </Animatable.View>
 );
 
 const RegisterScreen = ({ navigation }) => {
@@ -43,7 +45,6 @@ const RegisterScreen = ({ navigation }) => {
   const [imageUri, setImageUri] = useState(null);
 
   const selectImage = async () => {
-    // Ask for permission
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert('Permission Denied', 'We need permission to access your photos.');
@@ -96,169 +97,166 @@ const RegisterScreen = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
-      >
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ flexGrow: 1 }}
+    <LinearGradient
+      colors={['#f4f4f4', '#e0e0e0']}
+      style={styles.container}>
+      <SafeAreaView style={styles.container}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
         >
-          <View style={styles.formContainer}>
-            <Text style={styles.title}>Create Account</Text>
-            <Text style={styles.subtitle}>Please fill in the details below</Text>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={styles.scrollContent}
+          >
+            <Animatable.View 
+              animation="fadeInUp" 
+              duration={1000} 
+              style={styles.formContainer}>
+              
+              <Animatable.Text animation="fadeIn" style={styles.title}>
+                Create Account
+              </Animatable.Text>
+              <Animatable.Text animation="fadeIn" delay={200} style={styles.subtitle}>
+                Please fill in the details below
+              </Animatable.Text>
 
-            <TouchableOpacity onPress={selectImage} style={styles.imagePickerButton}>
-              {imageUri ? (
-                <Image source={{ uri: imageUri }} style={styles.selectedImage} />
-              ) : (
-                <View style={styles.placeholderContainer}>
-                  <Text style={styles.placeholderText}>Tap to select profile image</Text>
+              <Animatable.View animation="zoomIn" delay={400}>
+                <TouchableOpacity onPress={selectImage} style={styles.imagePickerButton}>
+                  {imageUri ? (
+                    <Image source={{ uri: imageUri }} style={styles.selectedImage} />
+                  ) : (
+                    <View style={styles.placeholderContainer}>
+                      <Text style={styles.placeholderText}>Tap to select profile image</Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              </Animatable.View>
+
+              <InputField
+                placeholder="Full Name"
+                value={name}
+                onChangeText={setName}
+                animation="fadeInLeft"
+                delay={600}
+              />
+
+              <InputField
+                placeholder="Email Address"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                animation="fadeInRight"
+                delay={700}
+              />
+
+              <InputField
+                placeholder="Mobile Number"
+                value={mobile}
+                onChangeText={setMobile}
+                keyboardType="phone-pad"
+                animation="fadeInLeft"
+                delay={800}
+              />
+
+              <InputField
+                placeholder="Address"
+                value={address}
+                onChangeText={setAddress}
+                animation="fadeInRight"
+                delay={900}
+              />
+
+              <InputField
+                placeholder="Password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                animation="fadeInLeft"
+                delay={1000}
+              />
+
+              <InputField
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry
+                animation="fadeInRight"
+                delay={1100}
+              />
+
+              <Animatable.View animation="fadeInUp" delay={1200}>
+                <TouchableOpacity 
+                  style={styles.registerButton} 
+                  onPress={handleRegister}
+                  activeOpacity={0.8}>
+                  <Text style={styles.registerButtonText}>Create Account</Text>
+                </TouchableOpacity>
+
+                <View style={styles.loginContainer}>
+                  <Text style={styles.loginText}>Already have an account? </Text>
+                  <TouchableOpacity 
+                    onPress={() => navigation.navigate('Login')}
+                    activeOpacity={0.7}>
+                    <Text style={styles.loginLink}>Sign In</Text>
+                  </TouchableOpacity>
                 </View>
-              )}
-            </TouchableOpacity>
-
-            <InputField
-              placeholder="Full Name"
-              value={name}
-              onChangeText={setName}
-            />
-
-            <InputField
-              placeholder="Email Address"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-            />
-
-            <InputField
-              placeholder="Mobile Number"
-              value={mobile}
-              onChangeText={setMobile}
-              keyboardType="phone-pad"
-            />
-
-            <InputField
-              placeholder="Address"
-              value={address}
-              onChangeText={setAddress}
-            />
-
-            <InputField
-              placeholder="Password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
-
-            <InputField
-              placeholder="Confirm Password"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry
-            />
-
-            <TouchableOpacity 
-              style={styles.registerButton} 
-              onPress={handleRegister}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.registerButtonText}>Create Account</Text>
-            </TouchableOpacity>
-
-            <View style={styles.loginContainer}>
-              <Text style={styles.loginText}>Already have an account? </Text>
-              <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                <Text style={styles.loginLink}>Sign In</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+              </Animatable.View>
+            </Animatable.View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingVertical: 30,
   },
   formContainer: {
-    flex: 1,
-    padding: 24,
-    paddingTop: 40,
+    backgroundColor: 'white',
+    margin: 20,
+    borderRadius: 25,
+    padding: 25,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 15,
+    elevation: 8,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     color: '#1a1a1a',
+    textAlign: 'center',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
     color: '#666',
+    textAlign: 'center',
     marginBottom: 32,
   },
-  inputContainer: {
-    marginBottom: 16,
-  },
   input: {
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 12,
-    fontSize: 16,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 15,
+    padding: 15,
+    marginBottom: 20,
     borderWidth: 1,
-    borderColor: '#e1e1e1',
-    color: '#1a1a1a',
+    borderColor: '#e0e0e0',
+    fontSize: 16,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 3.84,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
     elevation: 2,
-  },
-  registerButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
-    paddingVertical: 16,
-    marginTop: 24,
-    shadowColor: '#007AFF',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  registerButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  loginContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 24,
-    paddingBottom: 24,
-  },
-  loginText: {
-    fontSize: 16,
-    color: '#666',
-  },
-  loginLink: {
-    fontSize: 16,
-    color: '#007AFF',
-    fontWeight: '600',
   },
   imagePickerButton: {
     width: 150,
@@ -269,9 +267,14 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#f0f0f0',
     borderWidth: 1,
-    borderColor: '#e1e1e1',
+    borderColor: '#e0e0e0',
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   selectedImage: {
     width: '100%',
@@ -282,18 +285,46 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 15,
   },
   placeholderText: {
-    color: '#666',
+    color: '#888',
     fontSize: 14,
     textAlign: 'center',
-    paddingHorizontal: 10,
   },
-  errorText: {
-    color: 'red',
-    fontSize: 14,
-    marginTop: 5,
-    textAlign: 'center',
+  registerButton: {
+    backgroundColor: '#007bff',
+    borderRadius: 15,
+    paddingVertical: 15,
+    alignItems: 'center',
+    shadowColor: '#007bff',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
+    marginTop: 10,
+  },
+  registerButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+    letterSpacing: 0.5,
+  },
+  loginContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+    paddingVertical: 10,
+  },
+  loginText: {
+    color: '#666',
+    fontSize: 16,
+  },
+  loginLink: {
+    color: '#007bff',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
 
