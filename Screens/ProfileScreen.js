@@ -50,6 +50,7 @@ const ProfileScreen = () => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      navigation.replace('Login');
     } catch (error) {
       Alert.alert('Logout Failed', error.message);
     }

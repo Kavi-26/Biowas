@@ -12,7 +12,8 @@ import ProfileScreen from './Screens/ProfileScreen';
 import ProductsScreen from './Screens/ProductsScreen';
 import OrderPlacedScreen from './Screens/OrderPlacesScreen';
 import MapScreen from './Screens/MapScreen';
-import AdminScreen from './Screens/AdminScreen'; // ✅ Added AdminScreen
+import AdminScreen from './Screens/AdminScreen'; // 
+import PointsScreen from './Screens/PointsScreen'; // 
 
 // Create Stack Navigator
 const Stack = createStackNavigator();
@@ -71,6 +72,16 @@ const App = () => {
 
         {/* Admin Screen */}
         <Stack.Screen name="AdminScreen" component={AdminScreen} />
+
+        {/* Points Screen */}
+        <Stack.Screen 
+          name="PointsScreen" 
+          component={PointsScreen}
+          options={{
+            title: 'Manage Points',
+            headerLeft: null // Prevents going back to scanner
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

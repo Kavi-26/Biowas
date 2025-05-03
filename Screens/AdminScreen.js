@@ -1,104 +1,67 @@
-import React, { useState, useEffect, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
-import { Camera } from 'expo-camera';
-import { auth, db } from '../firebaseConfig';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import React, { useState } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, Button } from 'react-native';
+import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 
-const AdminScreen = ({ navigation }) => {
-  const [hasPermission, setHasPermission] = useState(null);
-  const [scanned, setScanned] = useState(false);
-  const cameraRef = useRef(null);
+const AdminScreen = () => {
+  const [facing, setFacing] = useState(CameraType.back);
+  const [permission, requestPermission] = useCameraPermissions();
 
-  useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === 'granted');
-    })();
-  }, []);
+  if (!permission) return <View />;
 
-  const handleBarCodeScanned = async ({ data }) => {
-    setScanned(true);
-    try {
-      const decoded = JSON.parse(data);
+  if (!permission.granted) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.message}>We need your permission to show the camera</Text>
+        <Button title="Grant Permission" onPress={requestPermission} />
+      </View>
+    );
+  }
 
-      const q = query(collection(db, 'users'), where('uid', '==', decoded.uid));
-      const snapshot = await getDocs(q);
-
-      if (!snapshot.empty) {
-        const userDoc = snapshot.docs[0].data();
-
-        if (userDoc.isAdmin === true) {
-          navigation.navigate('PointsScreen');
-        } else {
-          Alert.alert('Access Denied', 'User is not an admin.');
-        }
-      } else {
-        Alert.alert('User Not Found', 'No matching user for this QR.');
-      }
-    } catch (err) {
-      Alert.alert('Scan Error', 'Invalid QR Code or corrupted data.');
-    }
+  const toggleCameraFacing = () => {
+    setFacing(current => (current === CameraType.back ? CameraType.front : CameraType.back));
   };
-
-  if (hasPermission === null) {
-    return <View style={styles.center}><Text>Requesting camera permission...</Text></View>;
-  }
-
-  if (hasPermission === false) {
-    return <View style={styles.center}><Text>No access to camera.</Text></View>;
-  }
 
   return (
     <View style={styles.container}>
-      <Camera
-        style={StyleSheet.absoluteFillObject}
-        ref={cameraRef}
-        type="back" // ✅ Correct usage without Camera.Constants.Type or CameraType
-        onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-        barCodeScannerSettings={{
-          barCodeTypes: ['qr'],
-        }}
-      />
-      {scanned && (
-        <TouchableOpacity
-          style={styles.scanButton}
-          onPress={() => setScanned(false)}
-        >
-          <Text style={styles.scanText}>Scan Again</Text>
-        </TouchableOpacity>
-      )}
+      <CameraView style={styles.camera} facing={facing}>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
+            <Text style={styles.text}>Flip Camera</Text>
+          </TouchableOpacity>
+        </View>
+      </CameraView>
     </View>
   );
 };
 
+export default AdminScreen;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  center: {
-    flex: 1,
     justifyContent: 'center',
+  },
+  message: {
+    textAlign: 'center',
+    paddingBottom: 10,
+  },
+  camera: {
+    flex: 1,
+  },
+  buttonContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: 'transparent',
+    margin: 64,
+  },
+  button: {
+    flex: 1,
+    alignSelf: 'flex-end',
     alignItems: 'center',
   },
-  scanButton: {
-    position: 'absolute',
-    bottom: 40,
-    alignSelf: 'center',
-    backgroundColor: '#34d399',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-  },
-  scanText: {
-    color: '#fff',
+  text: {
+    fontSize: 24,
     fontWeight: 'bold',
+    color: 'white',
   },
 });
-
-export default AdminScreen;

@@ -6,11 +6,31 @@ import {
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
-  Alert
+  Alert,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Image,
 } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { collection, addDoc } from 'firebase/firestore';
-import { auth, db } from '../firebaseConfig'; // Use 'db' here
+import { auth, db } from '../firebaseConfig';
+import * as ImagePicker from 'expo-image-picker';
+
+const InputField = ({ placeholder, value, onChangeText, secureTextEntry, keyboardType }) => (
+  <View style={styles.inputContainer}>
+    <TextInput
+      style={styles.input}
+      placeholder={placeholder}
+      value={value}
+      onChangeText={onChangeText}
+      secureTextEntry={secureTextEntry}
+      keyboardType={keyboardType}
+      placeholderTextColor="#666"
+      autoCapitalize="none"
+    />
+  </View>
+);
 
 const RegisterScreen = ({ navigation }) => {
   const [name, setName] = useState('');
@@ -20,10 +40,32 @@ const RegisterScreen = ({ navigation }) => {
   const [imageURL, setImageURL] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [imageUri, setImageUri] = useState(null);
+
+  const selectImage = async () => {
+    // Ask for permission
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Denied', 'We need permission to access your photos.');
+      return;
+    }
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+      setImageURL(result.assets[0].uri);
+    }
+  };
 
   const handleRegister = async () => {
-    if (!name || !email || !password || !confirmPassword || !mobile || !address || !imageURL) {
-      Alert.alert('Error', 'Please fill in all fields');
+    if (!name || !email || !password || !confirmPassword || !mobile || !address || !imageUri) {
+      Alert.alert('Error', 'Please fill in all fields and select a profile image');
       return;
     }
 
@@ -33,11 +75,9 @@ const RegisterScreen = ({ navigation }) => {
     }
 
     try {
-      // Create user in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Add user data to Firestore with auto-generated ID
       await addDoc(collection(db, 'users'), {
         uid: user.uid,
         username: name,
@@ -57,81 +97,87 @@ const RegisterScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.formContainer}>
-        <Text style={styles.title}>Create Account</Text>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+      >
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ flexGrow: 1 }}
+        >
+          <View style={styles.formContainer}>
+            <Text style={styles.title}>Create Account</Text>
+            <Text style={styles.subtitle}>Please fill in the details below</Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Full Name"
-          value={name}
-          onChangeText={setName}
-          placeholderTextColor="#888"
-        />
+            <TouchableOpacity onPress={selectImage} style={styles.imagePickerButton}>
+              {imageUri ? (
+                <Image source={{ uri: imageUri }} style={styles.selectedImage} />
+              ) : (
+                <View style={styles.placeholderContainer}>
+                  <Text style={styles.placeholderText}>Tap to select profile image</Text>
+                </View>
+              )}
+            </TouchableOpacity>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          placeholderTextColor="#888"
-        />
+            <InputField
+              placeholder="Full Name"
+              value={name}
+              onChangeText={setName}
+            />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Mobile Number"
-          value={mobile}
-          onChangeText={setMobile}
-          keyboardType="phone-pad"
-          placeholderTextColor="#888"
-        />
+            <InputField
+              placeholder="Email Address"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+            />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Address"
-          value={address}
-          onChangeText={setAddress}
-          placeholderTextColor="#888"
-        />
+            <InputField
+              placeholder="Mobile Number"
+              value={mobile}
+              onChangeText={setMobile}
+              keyboardType="phone-pad"
+            />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Image URL"
-          value={imageURL}
-          onChangeText={setImageURL}
-          placeholderTextColor="#888"
-        />
+            <InputField
+              placeholder="Address"
+              value={address}
+              onChangeText={setAddress}
+            />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          placeholderTextColor="#888"
-        />
+            <InputField
+              placeholder="Password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Confirm Password"
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          secureTextEntry
-          placeholderTextColor="#888"
-        />
+            <InputField
+              placeholder="Confirm Password"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry
+            />
 
-        <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
-          <Text style={styles.registerButtonText}>Register</Text>
-        </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.registerButton} 
+              onPress={handleRegister}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.registerButtonText}>Create Account</Text>
+            </TouchableOpacity>
 
-        <View style={styles.loginContainer}>
-          <Text style={styles.loginText}>Already have an account? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-            <Text style={styles.loginLink}>Login</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+            <View style={styles.loginContainer}>
+              <Text style={styles.loginText}>Already have an account? </Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                <Text style={styles.loginLink}>Sign In</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
@@ -139,59 +185,115 @@ const RegisterScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f4f4f4',
-    justifyContent: 'center',
+    backgroundColor: '#f8f9fa',
   },
   formContainer: {
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 20,
-    marginHorizontal: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    flex: 1,
+    padding: 24,
+    paddingTop: 40,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
-    color: '#333',
+    color: '#1a1a1a',
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 32,
+  },
+  inputContainer: {
+    marginBottom: 16,
   },
   input: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
+    backgroundColor: '#ffffff',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
     fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#e1e1e1',
+    color: '#1a1a1a',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 3.84,
+    elevation: 2,
   },
   registerButton: {
-    backgroundColor: '#007bff',
-    borderRadius: 10,
-    paddingVertical: 12,
-    alignItems: 'center',
-    marginTop: 10,
+    backgroundColor: '#007AFF',
+    borderRadius: 12,
+    paddingVertical: 16,
+    marginTop: 24,
+    shadowColor: '#007AFF',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   registerButtonText: {
     color: 'white',
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '600',
+    textAlign: 'center',
   },
   loginContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 15,
+    alignItems: 'center',
+    marginTop: 24,
+    paddingBottom: 24,
   },
   loginText: {
+    fontSize: 16,
     color: '#666',
   },
   loginLink: {
-    color: '#007bff',
-    fontWeight: 'bold',
+    fontSize: 16,
+    color: '#007AFF',
+    fontWeight: '600',
+  },
+  imagePickerButton: {
+    width: 150,
+    height: 150,
+    alignSelf: 'center',
+    marginBottom: 24,
+    borderRadius: 75,
+    overflow: 'hidden',
+    backgroundColor: '#f0f0f0',
+    borderWidth: 1,
+    borderColor: '#e1e1e1',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  selectedImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  placeholderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  placeholderText: {
+    color: '#666',
+    fontSize: 14,
+    textAlign: 'center',
+    paddingHorizontal: 10,
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 14,
+    marginTop: 5,
+    textAlign: 'center',
   },
 });
 
