@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,21 +14,29 @@ import {
 import { db } from '../firebaseConfig';
 import { doc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { getAuth, signOut } from 'firebase/auth';
 
-const PointsScreen = ({ navigation, route }) => {
-  const [userId, setUserId] = useState('');
+// Declare userUid constant here
+const USER_UID = 'AqbNrsbvZVRug5Wt4Mp6YwoL9l53'; // <-- Replace with actual UID or fetch dynamically
+
+const PointsScreen = ({ navigation }) => {
+  const userUid = USER_UID; // Use the constant in the component
   const [points, setPoints] = useState('');
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    // Fetch user points or other data using userUid
+  }, [userUid]);
+
   const handleAddPoints = async () => {
-    if (!userId || !points) {
+    if (!userUid || !points) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
     setLoading(true);
     try {
-      const q = query(collection(db, 'users'), where('uid', '==', userId));
+      const q = query(collection(db, 'users'), where('uid', '==', userUid));
       const snapshot = await getDocs(q);
 
       if (snapshot.empty) {
@@ -51,7 +59,6 @@ const PointsScreen = ({ navigation, route }) => {
           {
             text: 'OK',
             onPress: () => {
-              setUserId('');
               setPoints('');
             }
           }
@@ -61,6 +68,16 @@ const PointsScreen = ({ navigation, route }) => {
       Alert.alert('Error', 'Failed to update points');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      const auth = getAuth();
+      await signOut(auth);
+      navigation.replace('Login'); // Adjust 'Login' to your login screen name
+    } catch (error) {
+      Alert.alert('Error', 'Failed to log out');
     }
   };
 
@@ -74,20 +91,13 @@ const PointsScreen = ({ navigation, route }) => {
           <View style={styles.header}>
             <MaterialCommunityIcons name="star-circle" size={50} color="#FFD700" />
             <Text style={styles.title}>Manage Points</Text>
+            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+              <MaterialCommunityIcons name="logout" size={24} color="#fff" />
+              <Text style={styles.logoutText}>Logout</Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.form}>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>User ID</Text>
-              <TextInput
-                style={styles.input}
-                value={userId}
-                onChangeText={setUserId}
-                placeholder="Enter user ID"
-                placeholderTextColor="#666"
-              />
-            </View>
-
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Points to Add</Text>
               <TextInput
@@ -185,6 +195,21 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#d32f2f',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    marginTop: 15,
+  },
+  logoutText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    marginLeft: 8,
+    fontSize: 16,
   },
 });
 

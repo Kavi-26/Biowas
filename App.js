@@ -11,7 +11,7 @@ import HomeScreen from './Screens/HomeScreen';
 import ProfileScreen from './Screens/ProfileScreen';
 import ProductsScreen from './Screens/ProductsScreen';
 import OrderPlacedScreen from './Screens/OrderPlacesScreen';
-import MapScreen from './Screens/MapScreen';
+// import MapScreen from './Screens/MapScreen'; // Removed
 import AdminScreen from './Screens/AdminScreen'; // 
 import PointsScreen from './Screens/PointsScreen'; // 
 
@@ -21,7 +21,7 @@ const Stack = createStackNavigator();
 // Create Bottom Tab Navigator
 const Tab = createBottomTabNavigator();
 
-// 🚀 Bottom Tabs (Home, Products, Map, Profile)
+// 🚀 Bottom Tabs (Home, Products, Profile)
 const MainTabs = () => {
   return (
     <Tab.Navigator
@@ -33,8 +33,8 @@ const MainTabs = () => {
             iconName = 'home-outline';
           } else if (route.name === 'Products') {
             iconName = 'cart-outline';
-          } else if (route.name === 'Map') {
-            iconName = 'map-outline';
+          // } else if (route.name === 'Map') {
+          //   iconName = 'map-outline';
           } else if (route.name === 'Profile') {
             iconName = 'person-outline';
           }
@@ -47,7 +47,7 @@ const MainTabs = () => {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Products" component={ProductsScreen} />
-      <Tab.Screen name="Map" component={MapScreen} />
+      {/* <Tab.Screen name="Map" component={MapScreen} /> */}
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
