@@ -9,23 +9,41 @@ import {
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
-  ScrollView
+  ScrollView,
+  ActivityIndicator
 } from 'react-native';
 import { db } from '../firebaseConfig';
 import { doc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { getAuth, signOut } from 'firebase/auth';
+import * as Animatable from 'react-native-animatable';
+import { LinearGradient } from 'expo-linear-gradient';
 
-// Declare userUid constant here
 const USER_UID = 'AqbNrsbvZVRug5Wt4Mp6YwoL9l53'; // <-- Replace with actual UID or fetch dynamically
 
 const PointsScreen = ({ navigation }) => {
-  const userUid = USER_UID; // Use the constant in the component
+  const userUid = USER_UID;
   const [points, setPoints] = useState('');
   const [loading, setLoading] = useState(false);
+  const [userData, setUserData] = useState(null);
+
+  const fetchUserDetails = async () => {
+    try {
+      const q = query(collection(db, 'users'), where('uid', '==', userUid));
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        const userDoc = querySnapshot.docs[0];
+        setUserData({ ...userDoc.data(), docId: userDoc.id });
+      } else {
+        setUserData(null);
+      }
+    } catch (error) {
+      setUserData(null);
+    }
+  };
 
   useEffect(() => {
-    // Fetch user points or other data using userUid
+    fetchUserDetails();
   }, [userUid]);
 
   const handleAddPoints = async () => {
@@ -52,8 +70,10 @@ const PointsScreen = ({ navigation }) => {
         points: newPoints
       });
 
+      setUserData({ ...userDoc.data(), points: newPoints, docId: userDoc.id });
+
       Alert.alert(
-        'Success', 
+        'Success',
         `Points updated successfully!\nNew total: ${newPoints}`,
         [
           {
@@ -75,63 +95,112 @@ const PointsScreen = ({ navigation }) => {
     try {
       const auth = getAuth();
       await signOut(auth);
-      navigation.replace('Login'); // Adjust 'Login' to your login screen name
+      navigation.replace('Login');
     } catch (error) {
       Alert.alert('Error', 'Failed to log out');
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={styles.header}>
-            <MaterialCommunityIcons name="star-circle" size={50} color="#FFD700" />
-            <Text style={styles.title}>Manage Points</Text>
-            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+    <LinearGradient
+      colors={['#f4f4f4', '#e0e0e0']}
+      style={styles.container}>
+      <SafeAreaView style={styles.container}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.keyboardView}
+        >
+          <ScrollView contentContainerStyle={styles.scrollContent}>
+            <Animatable.View 
+              animation="fadeInDown" 
+              duration={1000} 
+              style={styles.header}>
+              <Animatable.View animation="pulse" easing="ease-out" iterationCount="infinite">
+                <MaterialCommunityIcons name="star-circle" size={60} color="#FFD700" />
+              </Animatable.View>
+              <Animatable.Text animation="fadeIn" delay={500} style={styles.title}>
+                Manage Points
+              </Animatable.Text>
+
+              {userData && (
+                <Animatable.View 
+                  animation="fadeInUp" 
+                  delay={600} 
+                  style={styles.userInfoContainer}>
+                  <Text style={styles.userInfoText}>
+                    Name: {userData.username || 'N/A'}
+                  </Text>
+                  <Text style={styles.userInfoText}>
+                    Email: {userData.email || 'N/A'}
+                  </Text>
+                  <Text style={styles.userInfoText}>
+                    Mobile: {userData.mobile || 'N/A'}
+                  </Text>
+                  <Text style={styles.userInfoText}>
+                    Address: {userData.address || 'N/A'}
+                  </Text>
+                  <Animatable.Text 
+                    animation="bounceIn" 
+                    delay={800} 
+                    style={styles.pointsText}>
+                    Current Points: {userData.points ?? 0}
+                  </Animatable.Text>
+                </Animatable.View>
+              )}
+            </Animatable.View>
+
+            <Animatable.View 
+              animation="fadeInUp" 
+              delay={800} 
+              style={styles.form}>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Points to Add</Text>
+                <TextInput
+                  style={styles.input}
+                  value={points}
+                  onChangeText={setPoints}
+                  placeholder="Enter points"
+                  keyboardType="numeric"
+                  placeholderTextColor="#666"
+                />
+              </View>
+
+              <TouchableOpacity
+                style={[styles.button, loading && styles.buttonDisabled]}
+                onPress={handleAddPoints}
+                disabled={loading}
+                activeOpacity={0.8}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Add Points</Text>
+                )}
+              </TouchableOpacity>
+            </Animatable.View>
+          </ScrollView>
+
+          <Animatable.View 
+            animation="fadeInUp" 
+            delay={1000} 
+            style={styles.bottomContainer}>
+            <TouchableOpacity 
+              style={styles.logoutButton} 
+              onPress={handleLogout}
+              activeOpacity={0.8}>
               <MaterialCommunityIcons name="logout" size={24} color="#fff" />
               <Text style={styles.logoutText}>Logout</Text>
             </TouchableOpacity>
-          </View>
-
-          <View style={styles.form}>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Points to Add</Text>
-              <TextInput
-                style={styles.input}
-                value={points}
-                onChangeText={setPoints}
-                placeholder="Enter points"
-                keyboardType="numeric"
-                placeholderTextColor="#666"
-              />
-            </View>
-
-            <TouchableOpacity
-              style={[styles.button, loading && styles.buttonDisabled]}
-              onPress={handleAddPoints}
-              disabled={loading}
-            >
-              {loading ? (
-                <Text style={styles.buttonText}>Processing...</Text>
-              ) : (
-                <Text style={styles.buttonText}>Add Points</Text>
-              )}
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+          </Animatable.View>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   keyboardView: {
     flex: 1,
@@ -145,23 +214,46 @@ const styles = StyleSheet.create({
     marginVertical: 30,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
+    color: '#1a1a1a',
+    marginTop: 15,
+  },
+  userInfoContainer: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 20,
+    marginTop: 20,
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  userInfoText: {
+    fontSize: 16,
     color: '#333',
+    marginBottom: 8,
+  },
+  pointsText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2E7D32',
     marginTop: 10,
   },
   form: {
     backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 20,
+    borderRadius: 25,
+    padding: 25,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 4,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.2,
+    shadowRadius: 15,
+    elevation: 8,
   },
   inputContainer: {
     marginBottom: 20,
@@ -174,19 +266,29 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: '#f9f9f9',
+    borderRadius: 15,
+    padding: 15,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
+    borderColor: '#e0e0e0',
     fontSize: 16,
     color: '#333',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   button: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#007bff',
     paddingVertical: 15,
-    borderRadius: 8,
+    borderRadius: 15,
     alignItems: 'center',
     marginTop: 10,
+    shadowColor: '#007bff',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
   },
   buttonDisabled: {
     backgroundColor: '#88c98b',
@@ -195,21 +297,31 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
+    letterSpacing: 0.5,
   },
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#d32f2f',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-    marginTop: 15,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 15,
+    marginTop: 20,
+    shadowColor: '#d32f2f',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
   },
   logoutText: {
     color: '#fff',
     fontWeight: 'bold',
     marginLeft: 8,
     fontSize: 16,
+  },
+  bottomContainer: {
+    alignItems: 'center',
+    marginTop: 20,
   },
 });
 

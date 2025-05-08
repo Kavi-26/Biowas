@@ -52,33 +52,70 @@ const LoginScreen = ({ navigation }) => {
       <SafeAreaView style={styles.container}>
         {loading ? (
           <Animatable.View 
-            animation="pulse" 
-            easing="ease-out" 
+            animation={{
+              0: { scale: 1 },
+              0.5: { scale: 1.2 },
+              1: { scale: 1 }
+            }}
+            easing="ease-out"
             iterationCount="infinite"
+            duration={1500}
             style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#007bff" />
           </Animatable.View>
         ) : (
           <Animatable.View 
-            animation="fadeInUp" 
+            animation="slideInUp" 
             duration={1000} 
             style={styles.content}>
             <Animatable.Image
-              animation="bounceIn"
-              duration={1500}
+              animation={{
+                from: { 
+                  scale: 0,
+                  rotate: '0deg',
+                  opacity: 0
+                },
+                to: { 
+                  scale: 1,
+                  rotate: '360deg',
+                  opacity: 1
+                }
+              }}
+              duration={2000}
               source={require('../assets/logo.png')}
               style={styles.logo}
             />
 
             <Animatable.View 
-              animation="fadeInUp"
+              animation={{
+                from: {
+                  translateY: 50,
+                  opacity: 0
+                },
+                to: {
+                  translateY: 0,
+                  opacity: 1
+                }
+              }}
+              duration={800}
               delay={500}
               style={styles.formContainer}>
-              <Text style={styles.title}>Welcome Back</Text>
+              <Animatable.Text 
+                animation="rubberBand"
+                delay={1500}
+                style={styles.title}>
+                Welcome Back
+              </Animatable.Text>
 
-              <Animatable.View animation="fadeInLeft" delay={600}>
+              <Animatable.View 
+                animation={{
+                  from: { translateX: -100, opacity: 0 },
+                  to: { translateX: 0, opacity: 1 }
+                }}
+                duration={600}
+                delay={800}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, styles.emailInput]}
                   placeholder="Email"
                   value={email}
                   onChangeText={setEmail}
@@ -88,9 +125,15 @@ const LoginScreen = ({ navigation }) => {
                 />
               </Animatable.View>
 
-              <Animatable.View animation="fadeInRight" delay={800}>
+              <Animatable.View 
+                animation={{
+                  from: { translateX: 100, opacity: 0 },
+                  to: { translateX: 0, opacity: 1 }
+                }}
+                duration={600}
+                delay={1000}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, styles.passwordInput]}
                   placeholder="Password"
                   value={password}
                   onChangeText={setPassword}
@@ -99,7 +142,13 @@ const LoginScreen = ({ navigation }) => {
                 />
               </Animatable.View>
 
-              <Animatable.View animation="fadeIn" delay={1000}>
+              <Animatable.View 
+                animation={{
+                  from: { scale: 0.5, opacity: 0 },
+                  to: { scale: 1, opacity: 1 }
+                }}
+                duration={500}
+                delay={1200}>
                 <TouchableOpacity 
                   style={styles.forgotPassword}
                   activeOpacity={0.7}>
@@ -110,7 +159,13 @@ const LoginScreen = ({ navigation }) => {
                   style={styles.loginButton} 
                   onPress={handleLogin}
                   activeOpacity={0.8}>
-                  <Text style={styles.loginButtonText}>Login</Text>
+                  <Animatable.Text 
+                    animation="pulse"
+                    iterationCount="infinite"
+                    duration={2000}
+                    style={styles.loginButtonText}>
+                    Login
+                  </Animatable.Text>
                 </TouchableOpacity>
 
                 <View style={styles.registerContainer}>
@@ -118,7 +173,13 @@ const LoginScreen = ({ navigation }) => {
                   <TouchableOpacity 
                     onPress={() => navigation.navigate('Register')}
                     activeOpacity={0.7}>
-                    <Text style={styles.registerLink}>Register</Text>
+                    <Animatable.Text 
+                      animation="flash"
+                      delay={2000}
+                      duration={2000}
+                      style={styles.registerLink}>
+                      Register
+                    </Animatable.Text>
                   </TouchableOpacity>
                 </View>
               </Animatable.View>
@@ -180,6 +241,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
+  },
+  emailInput: {
+    transform: [{ scale: 1 }],
+  },
+  passwordInput: {
+    transform: [{ scale: 1 }],
   },
   forgotPassword: {
     alignSelf: 'flex-end',

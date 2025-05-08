@@ -112,97 +112,180 @@ const RegisterScreen = ({ navigation }) => {
             contentContainerStyle={styles.scrollContent}
           >
             <Animatable.View 
-              animation="fadeInUp" 
+              animation="slideInUp" 
               duration={1000} 
-              style={styles.formContainer}>
+              style={styles.content}>
               
-              <Animatable.Text animation="fadeIn" style={styles.title}>
-                Create Account
-              </Animatable.Text>
-              <Animatable.Text animation="fadeIn" delay={200} style={styles.subtitle}>
-                Please fill in the details below
-              </Animatable.Text>
-
-              <Animatable.View animation="zoomIn" delay={400}>
-                <TouchableOpacity onPress={selectImage} style={styles.imagePickerButton}>
-                  {imageUri ? (
-                    <Image source={{ uri: imageUri }} style={styles.selectedImage} />
-                  ) : (
-                    <View style={styles.placeholderContainer}>
-                      <Text style={styles.placeholderText}>Tap to select profile image</Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              </Animatable.View>
-
-              <InputField
-                placeholder="Full Name"
-                value={name}
-                onChangeText={setName}
-                animation="fadeInLeft"
-                delay={600}
+              <Animatable.Image
+                animation={{
+                  from: { 
+                    scale: 0,
+                    rotate: '0deg',
+                    opacity: 0
+                  },
+                  to: { 
+                    scale: 1,
+                    rotate: '360deg',
+                    opacity: 1
+                  }
+                }}
+                duration={2000}
+                source={require('../assets/logo.png')}
+                style={styles.logo}
               />
 
-              <InputField
-                placeholder="Email Address"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                animation="fadeInRight"
-                delay={700}
-              />
+              <Animatable.View 
+                animation={{
+                  from: {
+                    translateY: 50,
+                    opacity: 0
+                  },
+                  to: {
+                    translateY: 0,
+                    opacity: 1
+                  }
+                }}
+                duration={800}
+                delay={500}
+                style={styles.formContainer}>
+                
+                <Animatable.Text 
+                  animation="rubberBand"
+                  delay={1500}
+                  style={styles.title}>
+                  Create Account
+                </Animatable.Text>
 
-              <InputField
-                placeholder="Mobile Number"
-                value={mobile}
-                onChangeText={setMobile}
-                keyboardType="phone-pad"
-                animation="fadeInLeft"
-                delay={800}
-              />
+                <Animatable.Text 
+                  animation="fadeIn" 
+                  delay={1700}
+                  style={styles.subtitle}>
+                  Please fill in the details below
+                </Animatable.Text>
 
-              <InputField
-                placeholder="Address"
-                value={address}
-                onChangeText={setAddress}
-                animation="fadeInRight"
-                delay={900}
-              />
-
-              <InputField
-                placeholder="Password"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                animation="fadeInLeft"
-                delay={1000}
-              />
-
-              <InputField
-                placeholder="Confirm Password"
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry
-                animation="fadeInRight"
-                delay={1100}
-              />
-
-              <Animatable.View animation="fadeInUp" delay={1200}>
-                <TouchableOpacity 
-                  style={styles.registerButton} 
-                  onPress={handleRegister}
-                  activeOpacity={0.8}>
-                  <Text style={styles.registerButtonText}>Create Account</Text>
-                </TouchableOpacity>
-
-                <View style={styles.loginContainer}>
-                  <Text style={styles.loginText}>Already have an account? </Text>
-                  <TouchableOpacity 
-                    onPress={() => navigation.navigate('Login')}
-                    activeOpacity={0.7}>
-                    <Text style={styles.loginLink}>Sign In</Text>
+                <Animatable.View 
+                  animation={{
+                    from: { scale: 0, opacity: 0 },
+                    to: { scale: 1, opacity: 1 }
+                  }}
+                  duration={800}
+                  delay={800}>
+                  <TouchableOpacity onPress={selectImage} style={styles.imagePickerButton}>
+                    {imageUri ? (
+                      <Image source={{ uri: imageUri }} style={styles.selectedImage} />
+                    ) : (
+                      <View style={styles.placeholderContainer}>
+                        <Text style={styles.placeholderText}>Tap to select profile image</Text>
+                      </View>
+                    )}
                   </TouchableOpacity>
-                </View>
+                </Animatable.View>
+
+                <InputField
+                  placeholder="Full Name"
+                  value={name}
+                  onChangeText={setName}
+                  animation={{
+                    from: { translateX: -100, opacity: 0 },
+                    to: { translateX: 0, opacity: 1 }
+                  }}
+                  delay={1000}
+                />
+
+                <InputField
+                  placeholder="Email Address"
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  animation={{
+                    from: { translateX: 100, opacity: 0 },
+                    to: { translateX: 0, opacity: 1 }
+                  }}
+                  delay={1200}
+                />
+
+                <InputField
+                  placeholder="Mobile Number"
+                  value={mobile}
+                  onChangeText={setMobile}
+                  keyboardType="phone-pad"
+                  animation={{
+                    from: { translateX: -100, opacity: 0 },
+                    to: { translateX: 0, opacity: 1 }
+                  }}
+                  delay={1400}
+                />
+
+                <InputField
+                  placeholder="Address"
+                  value={address}
+                  onChangeText={setAddress}
+                  animation={{
+                    from: { translateX: 100, opacity: 0 },
+                    to: { translateX: 0, opacity: 1 }
+                  }}
+                  delay={1600}
+                />
+
+                <InputField
+                  placeholder="Password"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry
+                  animation={{
+                    from: { translateX: -100, opacity: 0 },
+                    to: { translateX: 0, opacity: 1 }
+                  }}
+                  delay={1800}
+                />
+
+                <InputField
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  secureTextEntry
+                  animation={{
+                    from: { translateX: 100, opacity: 0 },
+                    to: { translateX: 0, opacity: 1 }
+                  }}
+                  delay={2000}
+                />
+
+                <Animatable.View 
+                  animation={{
+                    from: { scale: 0.5, opacity: 0 },
+                    to: { scale: 1, opacity: 1 }
+                  }}
+                  duration={500}
+                  delay={2200}>
+                  <TouchableOpacity 
+                    style={styles.registerButton} 
+                    onPress={handleRegister}
+                    activeOpacity={0.8}>
+                    <Animatable.Text 
+                      animation="pulse"
+                      iterationCount="infinite"
+                      duration={2000}
+                      style={styles.registerButtonText}>
+                      Create Account
+                    </Animatable.Text>
+                  </TouchableOpacity>
+
+                  <View style={styles.loginContainer}>
+                    <Text style={styles.loginText}>Already have an account? </Text>
+                    <TouchableOpacity 
+                      onPress={() => navigation.navigate('Login')}
+                      activeOpacity={0.7}>
+                      <Animatable.Text 
+                        animation="flash"
+                        delay={2500}
+                        duration={2000}
+                        style={styles.loginLink}>
+                        Sign In
+                      </Animatable.Text>
+                    </TouchableOpacity>
+                  </View>
+                </Animatable.View>
               </Animatable.View>
             </Animatable.View>
           </ScrollView>
@@ -219,6 +302,9 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingVertical: 30,
+  },
+  content: {
+    flex: 1,
   },
   formContainer: {
     backgroundColor: 'white',
@@ -325,6 +411,12 @@ const styles = StyleSheet.create({
     color: '#007bff',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  logo: {
+    width: 100,
+    height: 100,
+    alignSelf: 'center',
+    marginBottom: 20,
   },
 });
 
