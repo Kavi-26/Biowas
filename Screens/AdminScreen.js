@@ -1,21 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
   Image,
   StyleSheet,
   Alert,
-  
   TouchableOpacity,
   SafeAreaView,
+  ActivityIndicator,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
+import * as Animatable from "react-native-animatable";
+import { LinearGradient } from "expo-linear-gradient";
 
 const AdminScreen = () => {
   const [image, setImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation();
+  const imageContainerRef = useRef(null);
 
   const handleImage = async (pickerResult) => {
     if (!pickerResult.canceled) {
@@ -28,7 +31,6 @@ const AdminScreen = () => {
         const base64 = asset.base64;
         if (!base64) throw new Error("No base64 data found");
 
-        // Send base64 image to goqr.me API
         const formData = new FormData();
         formData.append("file", {
           uri: `data:image/jpeg;base64,${base64}`,
@@ -45,13 +47,17 @@ const AdminScreen = () => {
         const qrData = result[0]?.symbol[0]?.data;
 
         if (qrData) {
+          if (imageContainerRef.current) {
+            await imageContainerRef.current.zoomOut(500);
+          }
           setIsLoading(false);
-          navigation.navigate('PointsScreen', { 
+          navigation.navigate("PointsScreen", {
             imageUri: uri,
-            userUid: qrData.trim() // Pass QR data as userUid
+            userUid: qrData.trim(),
+            transition: "zoomOut",
           });
         } else {
-          throw new Error('No QR Code found');
+          throw new Error("No QR Code found");
         }
       } catch (error) {
         setIsLoading(false);
@@ -69,8 +75,8 @@ const AdminScreen = () => {
       }
       const result = await ImagePicker.launchImageLibraryAsync({
         allowsEditing: true,
-        quality: 1, // Use maximum quality for better QR code reading
-        base64: true, // Needed for QR code scanning
+        quality: 1,
+        base64: true,
       });
       await handleImage(result);
     } catch (error) {
@@ -87,8 +93,8 @@ const AdminScreen = () => {
       }
       const result = await ImagePicker.launchCameraAsync({
         allowsEditing: true,
-        quality: 1, // Use maximum quality for better QR code reading
-        base64: true, // Needed for QR code scanning
+        quality: 1,
+        base64: true,
       });
       await handleImage(result);
     } catch (error) {
@@ -98,48 +104,60 @@ const AdminScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>QR Code Scanner</Text>
-      </View>
-      <View style={styles.content}>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity 
-            style={[styles.button, styles.cameraButton]} 
-            onPress={takePhoto}
-          >
-            <Text style={styles.buttonText}>📸 Take Photo</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.button, styles.galleryButton]} 
-            onPress={pickImage}
-          >
-            <Text style={styles.buttonText}>🖼️ Gallery</Text>
-          </TouchableOpacity>
-        </View>
-        {image ? (
-          <View style={styles.imageContainer}>
-            <Image source={{ uri: image }} style={styles.image} />
-            <TouchableOpacity
-              style={styles.clearButton}
-              onPress={() => setImage(null)}
-            >
-              <Text style={styles.buttonText}>❌ Clear Image</Text>
+      <LinearGradient colors={["#4285F4", "#34A853"]} style={styles.container}>
+        <Animatable.View animation="fadeIn" duration={1000} style={styles.header}>
+          <Text style={styles.headerText}>QR Code Scanner</Text>
+        </Animatable.View>
+
+        <View style={styles.content}>
+          <Animatable.View animation="slideInUp" duration={1000} style={styles.buttonContainer}>
+            <TouchableOpacity style={[styles.button, styles.cameraButton]} onPress={takePhoto}>
+              <Animatable.Text animation="pulse" iterationCount="infinite" style={styles.buttonText}>
+                📸 Take Photo
+              </Animatable.Text>
             </TouchableOpacity>
-          </View>
-        ) : (
-          <View style={styles.placeholderContainer}>
-            <Text style={styles.placeholderTitle}>No Image Selected</Text>
-            <Text style={styles.placeholderText}>
-              Take a photo or select one from your gallery to scan a QR code
-            </Text>
-          </View>
-        )}
-        {isLoading && (
-          <View style={styles.loadingContainer}>
-            <Text style={styles.loadingText}>Processing QR Code...</Text>
-          </View>
-        )}
-      </View>
+
+            <TouchableOpacity style={[styles.button, styles.galleryButton]} onPress={pickImage}>
+              <Text style={styles.buttonText}>🖼️ Gallery</Text>
+            </TouchableOpacity>
+          </Animatable.View>
+
+          {image ? (
+            <Animatable.View
+              ref={imageContainerRef}
+              animation="zoomIn"
+              duration={500}
+              style={styles.imageContainer}
+            >
+              <Image source={{ uri: image }} style={styles.image} />
+              <TouchableOpacity
+                style={styles.clearButton}
+                onPress={() => {
+                  imageContainerRef.current?.fadeOut(500).then(() => {
+                    setImage(null);
+                  });
+                }}
+              >
+                <Text style={styles.buttonText}>❌ Clear Image</Text>
+              </TouchableOpacity>
+            </Animatable.View>
+          ) : (
+            <Animatable.View animation="fadeIn" style={styles.placeholderContainer}>
+              <Text style={styles.placeholderTitle}>No Image Selected</Text>
+              <Text style={styles.placeholderText}>
+                Take a photo or select one from your gallery to scan a QR code
+              </Text>
+            </Animatable.View>
+          )}
+
+          {isLoading && (
+            <Animatable.View animation="fadeIn" style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#fff" />
+              <Text style={styles.loadingText}>Processing QR Code...</Text>
+            </Animatable.View>
+          )}
+        </View>
+      </LinearGradient>
     </SafeAreaView>
   );
 };
@@ -150,20 +168,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
   },
   header: {
-    backgroundColor: "#4285F4",
     padding: 20,
     paddingTop: 40,
     alignItems: "center",
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
+    backgroundColor: "transparent",
   },
   headerText: {
     color: "white",
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: "bold",
+    letterSpacing: 1,
   },
   content: {
     flex: 1,
@@ -184,12 +198,14 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
+    backdropFilter: "blur(10px)",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
   },
   cameraButton: {
-    backgroundColor: "#4285F4",
+    backgroundColor: "rgba(66, 133, 244, 0.9)",
   },
   galleryButton: {
-    backgroundColor: "#0F9D58",
+    backgroundColor: "rgba(15, 157, 88, 0.9)",
   },
   clearButton: {
     backgroundColor: "#DB4437",
@@ -257,7 +273,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0.7)",
     justifyContent: "center",
     alignItems: "center",
   },
