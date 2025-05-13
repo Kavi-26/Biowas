@@ -28,40 +28,21 @@ const AdminScreen = () => {
       setIsLoading(true);
 
       try {
-        const base64 = asset.base64;
-        if (!base64) throw new Error("No base64 data found");
-
-        const formData = new FormData();
-        formData.append("file", {
-          uri: `data:image/jpeg;base64,${base64}`,
-          name: "photo.jpg",
-          type: "image/jpeg",
-        });
-
-        const response = await fetch("https://api.qrserver.com/v1/read-qr-code/", {
-          method: "POST",
-          body: formData,
-        });
-
-        const result = await response.json();
-        const qrData = result[0]?.symbol[0]?.data;
-
-        if (qrData) {
-          if (imageContainerRef.current) {
-            await imageContainerRef.current.zoomOut(500);
-          }
-          setIsLoading(false);
-          navigation.navigate("PointsScreen", {
-            imageUri: uri,
-            userUid: qrData.trim(),
-            transition: "zoomOut",
-          });
-        } else {
-          throw new Error("No QR Code found");
+        // Skip QR code processing and redirect directly
+        if (imageContainerRef.current) {
+          await imageContainerRef.current.zoomOut(500);
         }
+        setIsLoading(false);
+        
+        // Navigate directly to PointsScreen with the image URI
+        navigation.navigate("PointsScreen", {
+          imageUri: uri,
+          userUid: "direct-access",
+          transition: "zoomOut"
+        });
       } catch (error) {
         setIsLoading(false);
-        Alert.alert("Error", error.message || "Could not process QR code");
+        Alert.alert("Error", error.message || "Could not process image");
       }
     }
   };
