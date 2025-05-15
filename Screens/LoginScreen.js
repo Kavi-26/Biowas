@@ -14,17 +14,19 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
 import * as Animatable from 'react-native-animatable';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
 
 const { width } = Dimensions.get('window');
 
 const LoginScreen = ({ navigation }) => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please enter email and password');
+      Alert.alert(t('login.error'), t('login.enterEmailPassword'));
       return;
     }
 
@@ -39,7 +41,7 @@ const LoginScreen = ({ navigation }) => {
         navigation.replace('Home');
       }
     } catch (error) {
-      Alert.alert('Login Error', error.message);
+      Alert.alert(t('login.loginError'), error.message);
     } finally {
       setLoading(false);
     }
@@ -104,7 +106,7 @@ const LoginScreen = ({ navigation }) => {
                 animation="rubberBand"
                 delay={1500}
                 style={styles.title}>
-                Welcome Back
+                {t('login.welcome')}
               </Animatable.Text>
 
               <Animatable.View 
@@ -116,7 +118,7 @@ const LoginScreen = ({ navigation }) => {
                 delay={800}>
                 <TextInput
                   style={[styles.input, styles.emailInput]}
-                  placeholder="Email"
+                  placeholder={t('login.email')}
                   value={email}
                   onChangeText={setEmail}
                   keyboardType="email-address"
@@ -134,7 +136,7 @@ const LoginScreen = ({ navigation }) => {
                 delay={1000}>
                 <TextInput
                   style={[styles.input, styles.passwordInput]}
-                  placeholder="Password"
+                  placeholder={t('login.password')}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry
@@ -152,7 +154,7 @@ const LoginScreen = ({ navigation }) => {
                 <TouchableOpacity 
                   style={styles.forgotPassword}
                   activeOpacity={0.7}>
-                  <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+                  <Text style={styles.forgotPasswordText}>{t('login.forgotPassword')}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity 
@@ -164,12 +166,12 @@ const LoginScreen = ({ navigation }) => {
                     iterationCount="infinite"
                     duration={2000}
                     style={styles.loginButtonText}>
-                    Login
+                    {t('login.login')}
                   </Animatable.Text>
                 </TouchableOpacity>
 
                 <View style={styles.registerContainer}>
-                  <Text style={styles.registerText}>Don't have an account? </Text>
+                  <Text style={styles.registerText}>{t('login.noAccount')}</Text>
                   <TouchableOpacity 
                     onPress={() => navigation.navigate('Register')}
                     activeOpacity={0.7}>
@@ -178,7 +180,7 @@ const LoginScreen = ({ navigation }) => {
                       delay={2000}
                       duration={2000}
                       style={styles.registerLink}>
-                      Register
+                      {t('login.register')}
                     </Animatable.Text>
                   </TouchableOpacity>
                 </View>

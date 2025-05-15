@@ -9,41 +9,12 @@ import {
   FlatList,
   ScrollView,
 } from 'react-native';
-
-const tipsData = [
-  {
-    id: '1',
-    title: 'What is Bio-waste?',
-    content:
-      'Bio-waste refers to biodegradable waste such as food scraps, garden waste, and manure that can be composted or converted into biogas.',
-  },
-  {
-    id: '2',
-    title: 'Segregate Waste Properly',
-    content:
-      'Always separate bio-waste from plastics and other non-biodegradables to help the environment and improve recycling efficiency.',
-  },
-  {
-    id: '3',
-    title: 'Composting at Home',
-    content:
-      'You can compost food waste like fruit peels, vegetable scraps, and eggshells to create organic fertilizer for your garden.',
-  },
-  {
-    id: '4',
-    title: 'Use Biodegradable Bags',
-    content:
-      'When disposing of bio-waste, use compostable or biodegradable bags instead of plastic to prevent pollution.',
-  },
-  {
-    id: '5',
-    title: 'Avoid Contamination',
-    content:
-      'Don’t throw metals, plastics, or glass in the bio-waste bin. It contaminates the waste and makes it hard to compost.',
-  },
-];
+import { useTranslation } from 'react-i18next';
 
 const HomeScreen = () => {
+  const { t } = useTranslation();
+  const tipsData = t('home.tips', { returnObjects: true });
+
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTip, setSelectedTip] = useState(null);
 
@@ -59,11 +30,11 @@ const HomeScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>🌱 Bio-Waste Tips</Text>
+      <Text style={styles.header}>{t('home.header')}</Text>
 
       <FlatList
         data={tipsData}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(_, idx) => idx.toString()}
         contentContainerStyle={{ padding: 20 }}
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.tipCard} onPress={() => openTip(item)}>
@@ -85,7 +56,7 @@ const HomeScreen = () => {
               <Text style={styles.modalTitle}>{selectedTip?.title}</Text>
               <Text style={styles.modalText}>{selectedTip?.content}</Text>
               <TouchableOpacity style={styles.closeButton} onPress={closeTip}>
-                <Text style={styles.closeButtonText}>Close</Text>
+                <Text style={styles.closeButtonText}>{t('home.close')}</Text>
               </TouchableOpacity>
             </ScrollView>
           </View>

@@ -3,8 +3,10 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "reac
 import * as Location from "expo-location";
 import { db } from "../firebaseConfig"; // Import Firestore
 import { collection, addDoc } from "firebase/firestore"; // Firebase Firestore methods
+import { useTranslation } from 'react-i18next';
 
 const OrderPlacedScreen = ({ navigation }) => { // Add navigation prop
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
   const [address, setAddress] = useState("");
@@ -93,11 +95,11 @@ const OrderPlacedScreen = ({ navigation }) => { // Add navigation prop
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Place Your Order</Text>
+      <Text style={styles.title}>{t('order.title', 'Place Your Order')}</Text>
 
       <TextInput
         style={styles.input}
-        placeholder="Enter your name"
+        placeholder={t('order.name', 'Enter your name')}
         placeholderTextColor="#aaa"
         value={name}
         onChangeText={setName}
@@ -105,7 +107,7 @@ const OrderPlacedScreen = ({ navigation }) => { // Add navigation prop
 
       <TextInput
         style={styles.input}
-        placeholder="Enter your mobile number"
+        placeholder={t('order.mobile', 'Enter your mobile number')}
         placeholderTextColor="#aaa"
         keyboardType="numeric"
         value={mobileNumber}
@@ -114,7 +116,7 @@ const OrderPlacedScreen = ({ navigation }) => { // Add navigation prop
 
       <TextInput
         style={[styles.input, styles.addressInput]}
-        placeholder="Enter your address"
+        placeholder={t('order.address', 'Enter your address')}
         placeholderTextColor="#aaa"
         value={address}
         onChangeText={setAddress}
@@ -124,16 +126,16 @@ const OrderPlacedScreen = ({ navigation }) => { // Add navigation prop
 
       <Text style={styles.locationText}>
         {loadingLocation
-          ? "Fetching location..."
-          : locationAddress || "Press 'Get Location' to fetch your current location."}
+          ? t('order.fetchingLocation', 'Fetching location...')
+          : locationAddress || t('order.getLocationPrompt', "Press 'Get Location' to fetch your current location.")}
       </Text>
 
       <TouchableOpacity style={styles.button} onPress={getLocation}>
-        <Text style={styles.buttonText}>Get Location</Text>
+        <Text style={styles.buttonText}>{t('order.getLocation', 'Get Location')}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={[styles.button, styles.submitButton]} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Submit</Text>
+        <Text style={styles.buttonText}>{t('order.submit', 'Submit')}</Text>
       </TouchableOpacity>
     </View>
   );

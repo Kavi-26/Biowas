@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
+import { useTranslation } from 'react-i18next';
 
 const ProductsScreen = ({ navigation }) => {
+  const { t } = useTranslation();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showQRCode, setShowQRCode] = useState(false);
@@ -38,7 +40,7 @@ const ProductsScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Bio Recycled Products</Text>
+      <Text style={styles.header}>{t('products.header', 'Bio Recycled Products')}</Text>
       <FlatList
         data={products}
         keyExtractor={(item) => item.id}
@@ -51,7 +53,7 @@ const ProductsScreen = ({ navigation }) => {
               <Text style={styles.material}>♻️ Made from: {item.recycledMaterial}</Text>
               <Text style={styles.price}>Rs. {item.price.toFixed(2)}</Text>
               <TouchableOpacity style={styles.button} onPress={() => handleBuyNow(item.price)}>
-                <Text style={styles.buttonText}>Buy Now</Text>
+                <Text style={styles.buttonText}>{t('products.buyNow', 'Buy Now')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -90,7 +92,7 @@ const ProductsScreen = ({ navigation }) => {
                 navigation.navigate('OrderPlaced'); // Navigate to OrderPlaced screen
               }}
             >
-              <Text style={styles.closeButtonText}>Close</Text>
+              <Text style={styles.closeButtonText}>{t('products.close', 'Close')}</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -18,6 +18,7 @@ import { auth, db } from '../firebaseConfig';
 import * as ImagePicker from 'expo-image-picker';
 import * as Animatable from 'react-native-animatable';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
 
 const InputField = ({ placeholder, value, onChangeText, secureTextEntry, keyboardType, animation, delay }) => (
   <Animatable.View animation={animation} delay={delay}>
@@ -35,6 +36,7 @@ const InputField = ({ placeholder, value, onChangeText, secureTextEntry, keyboar
 );
 
 const RegisterScreen = ({ navigation }) => {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [mobile, setMobile] = useState('');
@@ -47,7 +49,7 @@ const RegisterScreen = ({ navigation }) => {
   const selectImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission Denied', 'We need permission to access your photos.');
+      Alert.alert(t('register.permissionDenied'), t('register.permissionMessage'));
       return;
     }
 
@@ -66,12 +68,12 @@ const RegisterScreen = ({ navigation }) => {
 
   const handleRegister = async () => {
     if (!name || !email || !password || !confirmPassword || !mobile || !address || !imageUri) {
-      Alert.alert('Error', 'Please fill in all fields and select a profile image');
+      Alert.alert(t('register.error'), t('register.fillAllFields'));
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      Alert.alert(t('register.error'), t('register.passwordMismatch'));
       return;
     }
 
@@ -89,10 +91,10 @@ const RegisterScreen = ({ navigation }) => {
         createdAt: new Date().toISOString()
       });
 
-      Alert.alert('Success', 'Account created successfully');
+      Alert.alert(t('register.success'), t('register.successMessage'));
       navigation.replace('Login');
     } catch (error) {
-      Alert.alert('Registration Error', error.message);
+      Alert.alert(t('register.registrationError'), error.message);
     }
   };
 
@@ -153,14 +155,14 @@ const RegisterScreen = ({ navigation }) => {
                   animation="rubberBand"
                   delay={1500}
                   style={styles.title}>
-                  Create Account
+                  {t('register.createAccount')}
                 </Animatable.Text>
 
                 <Animatable.Text 
                   animation="fadeIn" 
                   delay={1700}
                   style={styles.subtitle}>
-                  Please fill in the details below
+                  {t('register.subtitle')}
                 </Animatable.Text>
 
                 <Animatable.View 
@@ -175,14 +177,14 @@ const RegisterScreen = ({ navigation }) => {
                       <Image source={{ uri: imageUri }} style={styles.selectedImage} />
                     ) : (
                       <View style={styles.placeholderContainer}>
-                        <Text style={styles.placeholderText}>Tap to select profile image</Text>
+                        <Text style={styles.placeholderText}>{t('register.selectImage')}</Text>
                       </View>
                     )}
                   </TouchableOpacity>
                 </Animatable.View>
 
                 <InputField
-                  placeholder="Full Name"
+                  placeholder={t('register.fullName')}
                   value={name}
                   onChangeText={setName}
                   animation={{
@@ -193,7 +195,7 @@ const RegisterScreen = ({ navigation }) => {
                 />
 
                 <InputField
-                  placeholder="Email Address"
+                  placeholder={t('register.email')}
                   value={email}
                   onChangeText={setEmail}
                   keyboardType="email-address"
@@ -205,7 +207,7 @@ const RegisterScreen = ({ navigation }) => {
                 />
 
                 <InputField
-                  placeholder="Mobile Number"
+                  placeholder={t('register.mobile')}
                   value={mobile}
                   onChangeText={setMobile}
                   keyboardType="phone-pad"
@@ -217,7 +219,7 @@ const RegisterScreen = ({ navigation }) => {
                 />
 
                 <InputField
-                  placeholder="Address"
+                  placeholder={t('register.address')}
                   value={address}
                   onChangeText={setAddress}
                   animation={{
@@ -228,7 +230,7 @@ const RegisterScreen = ({ navigation }) => {
                 />
 
                 <InputField
-                  placeholder="Password"
+                  placeholder={t('register.password')}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry
@@ -240,7 +242,7 @@ const RegisterScreen = ({ navigation }) => {
                 />
 
                 <InputField
-                  placeholder="Confirm Password"
+                  placeholder={t('register.confirmPassword')}
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
                   secureTextEntry
@@ -267,12 +269,12 @@ const RegisterScreen = ({ navigation }) => {
                       iterationCount="infinite"
                       duration={2000}
                       style={styles.registerButtonText}>
-                      Create Account
+                      {t('register.register')}
                     </Animatable.Text>
                   </TouchableOpacity>
 
                   <View style={styles.loginContainer}>
-                    <Text style={styles.loginText}>Already have an account? </Text>
+                    <Text style={styles.loginText}>{t('register.alreadyAccount')}</Text>
                     <TouchableOpacity 
                       onPress={() => navigation.navigate('Login')}
                       activeOpacity={0.7}>
@@ -281,7 +283,7 @@ const RegisterScreen = ({ navigation }) => {
                         delay={2500}
                         duration={2000}
                         style={styles.loginLink}>
-                        Sign In
+                        {t('register.signIn')}
                       </Animatable.Text>
                     </TouchableOpacity>
                   </View>

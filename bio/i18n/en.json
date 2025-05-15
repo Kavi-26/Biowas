@@ -1,0 +1,70 @@
+{
+  "profile": {
+    "title": "Profile",
+    "personalInfo": "Personal Information",
+    "mobile": "Mobile",
+    "address": "Address",
+    "points": "{{count}} Points",
+    "yourQRCode": "Your QR Code",
+    "logout": "Logout",
+    "changeLanguage": "Change Language",
+    "scanQRCode": "Scan QR Code"
+  },
+  "login": {
+    "welcome": "Welcome Back",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "login": "Login",
+    "noAccount": "Don't have an account?",
+    "register": "Register",
+    "error": "Error",
+    "enterEmailPassword": "Please enter email and password",
+    "loginError": "Login Error"
+  },
+  "register": {
+    "createAccount": "Create Account",
+    "subtitle": "Please fill in the details below",
+    "fullName": "Full Name",
+    "email": "Email Address",
+    "mobile": "Mobile Number",
+    "address": "Address",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "selectImage": "Tap to select profile image",
+    "register": "Create Account",
+    "alreadyAccount": "Already have an account?",
+    "signIn": "Sign In",
+    "error": "Error",
+    "fillAllFields": "Please fill in all fields and select a profile image",
+    "passwordMismatch": "Passwords do not match",
+    "registrationError": "Registration Error",
+    "success": "Account created successfully"
+  },
+  "home": {
+    "header": "🌱 Bio-Waste Tips",
+    "close": "Close",
+    "tips": [
+      {
+        "title": "What is Bio-waste?",
+        "content": "Bio-waste refers to biodegradable waste such as food scraps, garden waste, and manure that can be composted or converted into biogas."
+      },
+      {
+        "title": "Segregate Waste Properly",
+        "content": "Always separate bio-waste from plastics and other non-biodegradables to help the environment and improve recycling efficiency."
+      },
+      {
+        "title": "Composting at Home",
+        "content": "You can compost food waste like fruit peels, vegetable scraps, and eggshells to create organic fertilizer for your garden."
+      },
+      {
+        "title": "Use Biodegradable Bags",
+        "content": "When disposing of bio-waste, use compostable or biodegradable bags instead of plastic to prevent pollution."
+      },
+      {
+        "title": "Avoid Contamination",
+        "content": "Don’t throw metals, plastics, or glass in the bio-waste bin. It contaminates the waste and makes it hard to compost."
+      }
+    ]
+  }
+}
