@@ -151,11 +151,11 @@ const LoginScreen = ({ navigation }) => {
                 }}
                 duration={500}
                 delay={1200}>
-                <TouchableOpacity 
+                {/* <TouchableOpacity 
                   style={styles.forgotPassword}
                   activeOpacity={0.7}>
                   <Text style={styles.forgotPasswordText}>{t('login.forgotPassword')}</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
 
                 <TouchableOpacity 
                   style={styles.loginButton} 
